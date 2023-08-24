@@ -35,6 +35,11 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @GetMapping()
+    public ResponseEntity<DataResponseBuilder<List<AccountRes>>> getAllAccount() {
+        return accountService.getAllAccount();
+    }
+
     @Transactional
     @PostMapping("/create")
     public ResponseEntity<DataResponseBuilder<AccountRes>> createAccount(@RequestBody @Valid AccountReq request) {

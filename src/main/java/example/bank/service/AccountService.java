@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,9 @@ public class AccountService {
                 .name(request.getName())
                 .balance(BigDecimal.valueOf(0L))
                 .build();
+        System.out.println(newAccount.getAccountId());
         newAccount = accountRepo.save(newAccount);
+        System.out.println(newAccount.getAccountId());
         AccountRes accountRes = AccountRes.builder()
                 .accountId(newAccount.getAccountId())
                 .name(newAccount.getName())
@@ -59,7 +62,7 @@ public class AccountService {
             MessageResponseBuilder response = MessageResponseBuilder
                     .builder()
                     .status(HttpStatus.NOT_FOUND)
-                    .message("Account Not Found")
+                    .message("Account " + request.getAccountId() + " Not Found")
                     .build();
             return ResponseEntity.status(response.getStatus()).body(response);
         }
@@ -187,6 +190,25 @@ public class AccountService {
             int point = (int) Math.round(remainingAmount / 1000 * 2);
             return point + calculatePointsForPulsaPurchase(amount - remainingAmount);
         }
+    }
+
+    public ResponseEntity<DataResponseBuilder<List<AccountRes>>> getAllAccount() {
+        List<Account> listAccount = accountRepo.findAll(Sort.by(Sort.Direction.ASC, "accountId"));
+        List<AccountRes> lAccountRes = new ArrayList<>();
+        for (Account account : listAccount) {
+            AccountRes accountRes = AccountRes.builder()
+                    .accountId(account.getAccountId())
+                    .name(account.getName())
+                    .balance(account.getBalance())
+                    .build();
+            lAccountRes.add(accountRes);
+        }
+        DataResponseBuilder<List<AccountRes>> response = DataResponseBuilder.<List<AccountRes>>builder()
+                .status(HttpStatus.OK)
+                .message("OK")
+                .data(lAccountRes)
+                .build();
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }
